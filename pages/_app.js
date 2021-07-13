@@ -1,4 +1,5 @@
 import { createGlobalStyle, ThemeProvider } from 'styled-components'
+import { AlurakutStyles } from '../Sources/lib/AlurakutCommuns' 
 
 const GlobalStyle = createGlobalStyle`
   /* Reset CSS */
@@ -12,10 +13,23 @@ const GlobalStyle = createGlobalStyle`
     font-family: sans-serif;
     background-color: #D9E6F6;
   }
+
+  #__next {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+  ${AlurakutStyles}
 `
+
 const theme = {
   colors: {
-    primary: 'redd',
+    primary: 'red',
   },
 }
 
