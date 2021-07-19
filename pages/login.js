@@ -29,7 +29,7 @@ export default function LoginScreen() {
                     path: '/',
                     maxAge: 86400 * 7
                 })
-                const { isAuthenticated } = await fetch('http://localhost:3000/api/auth', {
+                const { isAuthenticated } = await fetch('https://alurakut-isabelalk.vercel.app/api/auth', {
                     headers: {
                         Authorization: token
                     }
