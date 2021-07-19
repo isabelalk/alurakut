@@ -9,13 +9,7 @@ export default async function recebedorDeRequests(request, response) {
         const registroCriado = await client.items.create({
             itemType: "975351",
             ...request.body,
-            // modo de comunidades do Dato
-            // title: "Comunidade de teste",
-            // imagemUrl: "https://github.com/isabelalk.png",
-            // creatorSlug: "isabelalk"
         })
-
-        console.log(registroCriado);
 
         response.json({
             dados: 'Algum dado',
@@ -23,7 +17,7 @@ export default async function recebedorDeRequests(request, response) {
         })
         return;
     }
-response.status(404).json({
-    message: "Ainda não temos nada no Git, mas no POST tem"
-})
+    response.status(404).json({
+        message: "Ainda não temos nada no Git, mas no POST tem"
+    })
 }
