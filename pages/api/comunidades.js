@@ -1,4 +1,5 @@
 import { SiteClient } from 'datocms-client';
+
 export default async function recebedorDeRequests(request, response) {
 
     if (request.method === 'POST') {
@@ -7,10 +8,11 @@ export default async function recebedorDeRequests(request, response) {
 
         const registroCriado = await client.items.create({
             itemType: "975351",
+            ...request.body,
             // modo de comunidades do Dato
-            title: "Comunidade de teste",
-            imagemUrl: "https://github.com/isabelalk.png",
-            creatorSlug: "isabelalk"
+            // title: "Comunidade de teste",
+            // imagemUrl: "https://github.com/isabelalk.png",
+            // creatorSlug: "isabelalk"
         })
 
         console.log(registroCriado);

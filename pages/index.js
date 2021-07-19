@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react'
+import nookies from 'nookies'
+import jwt from 'jsonwebtoken'
 import MainGrid from '../Sources/MainGrid'
 import Box from '../Sources/Box'
 import { AlurakutMenu, OrkutNostalgicIconSet } from '../Sources/lib/AlurakutCommuns'
@@ -48,8 +50,10 @@ function ProfileRelationsBox(propriedades) {
   )
 }
 
-export default function Home() {
-  const usuarioAleatorio = 'isabelalk'
+export default function Home(props) {
+  const usuarioAleatorio = props.githubUser;
+  const [isloading, setIsLoading] = useState(false)
+
   const [comunidades, setComunidades] = useState([
     {
       id: '125',
@@ -72,20 +76,36 @@ export default function Home() {
   const handleCriaComunidade = (e) => {
     e.preventDefault();
     const dadosDoForm = new FormData(e.target);
-    console.log('Campo: ', dadosDoForm.get('title'));
-    console.log('Campo: ', dadosDoForm.get('image'));
+
     const comunidade = {
-      id: new Date().toISOString(),
       title: dadosDoForm.get('title'),
-      image: dadosDoForm.get('image'),
+      imagemUrl: dadosDoForm.get('image'),
+      redirectLink: dadosDoForm.get('link'),
+      creatorSlug: usuarioAleatorio,
     }
-    const comunidadesAtualizadas = [...comunidades, comunidade];
+
+    setIsLoading(true)
+    fetch('/api/comunidades', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(comunidade)
+    })
+      .then(async (response) => {
+        const dados = await response.json();
+        console.log(dados.registroCriado);
+        const comunidade = dados.registroCriado;
+        const comunidadesAtualizadas = [...comunidades, comunidade];
+        setComunidades(comunidadesAtualizadas)
+        setIsLoading(false)
+      })
 
     /**Esse cara salva as comunidades no navegador */
     // localStorage.setItem('alurakut-comunidades', JSON.stringify(comunidadesAtualizadas)); 
     /**______________________________________________________________________________________ */
 
-    setComunidades(comunidadesAtualizadas)
+
   }
 
   console.log('seguidores antes do return', seguidores);
@@ -93,7 +113,7 @@ export default function Home() {
   // 0 - Pegar o array de dados do github 
   useEffect(function () {
     // GET 
-    fetch('https://api.github.com/users/peas/followers')
+    fetch('https://api.github.com/users/isabelalk/followers')
       .then(function (respostaDoServidor) {
         return respostaDoServidor.json();
       })
@@ -108,7 +128,7 @@ export default function Home() {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-        body: JSON.stringify({
+      body: JSON.stringify({
         "query": `query
         {
           allAlurakuts {
@@ -116,6 +136,7 @@ export default function Home() {
             id
             imagemUrl
             creatorSlug
+            redirectLink
           }
           
         }` })
@@ -156,31 +177,14 @@ export default function Home() {
           </Box>
           <Box>
             <h2 className="subTitle">O que você deseja fazer?</h2>
-            <form onSubmit={handleCriaComunidade} 
-            //   fetch('/api/comunidades', {
-            //     method: 'POST',
-            //     headers: {
-            //       'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify(comunidade)
-            //   })
-            //   .then(async (response) => {
-            //     const dados = await response.json();
-            //     console.log(dados.registroCriado);
-            //     const comunidade = dados.registroCriado;
-            //     const comunidadesAtualizadas = [...comunidades, comunidade];
-            //     setComunidades(comunidadesAtualizadas)
-            //   })
-            // }
-            
-            >
+            <form onSubmit={handleCriaComunidade} >
               <div>
                 <input
                   placeholder="Qual será o nome da sua comunidade?"
                   name="title"
                   aria-label="Qual será o nome da sua comunidade"
                   type="text"
-                 
+
                 />
               </div>
               <div>
@@ -191,12 +195,13 @@ export default function Home() {
                 />
                 <div>
                   <input
-                    placeholder='link'>
-                  </input>
+                    name="link"
+                    placeholder='link'
+                  />
                 </div>
               </div>
               <button>
-                Criar Comunidade
+                {isloading ? 'Carregando...' : 'Criar comunidades'}
               </button>
             </form>
           </Box>
@@ -211,11 +216,10 @@ export default function Home() {
               Comunidades ({comunidades.length})
             </h2>
             <ul>
-                {console.log(comunidades)}
               {comunidades.map((itemAtual) => {
                 return (
                   <li key={itemAtual.id}>
-                    <a href={`/users/${itemAtual.title}`}>
+                    <a href={itemAtual.redirectLink}>
                       <img src={itemAtual.imagemUrl} />
                       <span>{itemAtual.title}</span>
                     </a>
@@ -246,3 +250,43 @@ export default function Home() {
     </>
   )
 }
+export async function getServerSideProps(context) {
+  // const cookies = nookies.get(context)
+  // const token = cookies.USER_TOKEN
+  // const { githubUser } = jwt.decode(token).githubUser;
+
+  return {
+    props: {
+      githubUser: 'isabelalk'
+    }, // will be passed to the page component as props
+  }
+}
+
+
+// FINAL DA AULA 5 :
+// export async function getServerSideProps(context) {
+//   const cookies = nookies.get(context)
+//   const token = cookies.USER_TOKEN;
+//   const { isAuthenticated } = await fetch('https://alurakut.vercel.app/api/auth', {
+//     headers: {
+//         Authorization: token
+//       }
+//   })
+//   .then((resposta) => resposta.json())
+
+//   if(!isAuthenticated) {
+//     return {
+//       redirect: {
+//         destination: '/login',
+//         permanent: false,
+//       }
+//     }
+//   }
+
+//   const { githubUser } = jwt.decode(token);
+//   return {
+//     props: {
+//       githubUser
+//     }, // will be passed to the page component as props
+//   }
+// } 
